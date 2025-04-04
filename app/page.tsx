@@ -1,103 +1,70 @@
-import Image from "next/image";
+import { revalidatePath } from 'next/cache';
+import Link from 'next/link';
 
-export default function Home() {
+type ProductType = {
+  id: number;
+  price: number;
+  name: string;
+  description: string;
+};
+
+// You need to replace this URL with the one from your own MockAPI
+const URL = 'https://67eeec19c11d5ff4bf7b5231.mockapi.io/products';
+
+// Page level Purge Cache
+// export const revalidate = 0;
+
+const getData = async () => {
+  const response = await fetch(URL, { cache: 'force-cache' });
+  return await response.json();
+};
+
+export default async function Page() {
+  async function revalidateAction(formData: FormData) {
+    'use server';
+
+    revalidatePath('/');
+  }
+
+  const products = await getData();
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="p-10">
+      <div className="my-4 flex items-center justify-between gap-6">
+        <form>
+          <button formAction={revalidateAction}>
+            Purge Cache for Products
+          </button>
+        </form>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <Link
+          href="/product-counter"
+          className=" underline text-2xl underline-offset-2 decoration-orange-600"
+          prefetch={false}
+        >
+          Go to Product Counter <span className="text-xl">↗</span>
+        </Link>
+      </div>
+
+      <p className="py-4">Number of Products: {products.length}</p>
+
+      {products.map((product: ProductType) => (
+        <div
+          key={product.id}
+          className="border-2 border-dashed border-pink-600 rounded-xl my-6 p-4 py-6 flex gap-6 lg:gap-12"
+        >
+          <div className="min-w-24">
+            <p className="text-3xl leading-6 text-purple-800 pt-6">
+              ${product.price}
+            </p>
+          </div>
+          <div>
+            <p className="">{product.name}</p>
+            <p className="text-lg leading-6 text-gray-500">
+              {product.description}
+            </p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      ))}
     </div>
   );
 }
