@@ -9,13 +9,13 @@ type ProductType = {
 };
 
 // You need to replace this URL with the one from your own MockAPI
-const URL = 'https://67eeec19c11d5ff4bf7b5231.mockapi.io/products';
+const URL = 'https://69648a69e8ce952ce1f20387.mockapi.io/products';
 
 // Page level Purge Cache
 // export const revalidate = 0;
 
 const getData = async () => {
-  const response = await fetch(URL, { cache: 'force-cache' });
+  const response = await fetch(URL, { cache: 'no-store' });
   return await response.json();
 };
 
@@ -35,9 +35,8 @@ export default async function Page() {
             Purge Cache for Products
           </button>
         </form>
-
         <Link
-          href="/product-counter"
+          href={`/product-counter?countProduct=${products.length}`}
           className=" underline text-2xl underline-offset-2 decoration-orange-600"
           prefetch={false}
         >
